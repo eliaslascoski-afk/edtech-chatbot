@@ -1,25 +1,35 @@
 import { useState, useRef, useEffect } from 'react';
 
 export default function Home() {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Ola! Sou o assistente EdTech. Como posso ajudar voce hoje?' },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
+  const messagesRef = useRef(null);
 
+  // Remove scroll externo do iframe (html e body)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    document.documentElement.style.height = '100%';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.height = '100%';
+    document.body.style.overflow = 'hidden';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+  }, []);
+
+  // Scroll suave apenas dentro da area de mensagens
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
   }, [messages]);
 
   async function sendMessage() {
     const text = input.trim();
     if (!text || loading) return;
-
     setMessages((prev) => [...prev, { role: 'user', text }]);
     setInput('');
     setLoading(true);
-
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -51,18 +61,16 @@ export default function Home() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <span style={styles.headerIcon}>&#127891;</span>
-        <span>Assistente EdTech</span>
+        <span>Assistente de estilo EdTech</span>
       </div>
-
-      <div style={styles.messages}>
+      <div ref={messagesRef} style={styles.messages}>
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
               ...styles.bubble,
               alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-              background: msg.role === 'user' ? '#4f46e5' : '#f1f5f9',
+              background: msg.role === 'user' ? '#804090' : '#f1f5f9',
               color: msg.role === 'user' ? '#fff' : '#1e293b',
             }}
           >
@@ -76,7 +84,6 @@ export default function Home() {
         )}
         <div ref={bottomRef} />
       </div>
-
       <div style={styles.inputRow}>
         <textarea
           style={styles.textarea}
@@ -84,7 +91,7 @@ export default function Home() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="Digite sua pergunta sobre EaD..."
+          placeholder="Digite sua duvida sobre o Guia EdTech..."
           disabled={loading}
         />
         <button style={styles.button} onClick={sendMessage} disabled={loading}>
@@ -99,14 +106,17 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100vh',
+    height: '100%',
+    width: '100%',
     maxWidth: '700px',
     margin: '0 auto',
-    fontFamily: 'sans-serif',
+    fontFamily: "'PT Sans', sans-serif",
     background: '#fff',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   },
   header: {
-    background: '#4f46e5',
+    background: '#804090',
     color: '#fff',
     padding: '14px 20px',
     fontSize: '18px',
@@ -114,8 +124,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
+    flexShrink: 0,
   },
-  headerIcon: { fontSize: '22px' },
   messages: {
     flex: 1,
     overflowY: 'auto',
@@ -123,14 +133,16 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
+    minHeight: 0,
   },
   bubble: {
     maxWidth: '80%',
     padding: '10px 14px',
     borderRadius: '16px',
     lineHeight: 1.5,
-    fontSize: '15px',
+    fontSize: '14px',
     whiteSpace: 'pre-wrap',
+    fontFamily: "'PT Sans', sans-serif",
   },
   inputRow: {
     display: 'flex',
@@ -138,6 +150,8 @@ const styles = {
     padding: '12px 16px',
     borderTop: '1px solid #e2e8f0',
     background: '#f8fafc',
+    flexShrink: 0,
+    alignItems: 'flex-end',
   },
   textarea: {
     flex: 1,
@@ -147,10 +161,11 @@ const styles = {
     border: '1px solid #cbd5e1',
     fontSize: '14px',
     outline: 'none',
-    fontFamily: 'sans-serif',
+    fontFamily: "'PT Sans', sans-serif",
+    boxSizing: 'border-box',
   },
   button: {
-    background: '#4f46e5',
+    background: '#804090',
     color: '#fff',
     border: 'none',
     borderRadius: '10px',
@@ -158,5 +173,7 @@ const styles = {
     cursor: 'pointer',
     fontWeight: 'bold',
     fontSize: '14px',
+    fontFamily: "'PT Sans', sans-serif",
+    flexShrink: 0,
   },
 };
